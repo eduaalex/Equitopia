@@ -1,8 +1,11 @@
 
 #-*- coding: utf-8 -*-
+from datetime import datetime
+
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
 
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 class Rent_type_get(models.Model):
 
 	_inherit="rent.type"
@@ -77,6 +80,30 @@ class Account_analytic_account_bh(models.Model):
 		for rec in self.rent_schedule_ids:
 			rec.hecho_pago=str(pago)+"/"+str(total_hecho)
 			pago+=1
+    		
+	def action_invoice_payment(self):
+		inv_obj = self.env['account.move']
+		for payment in self.rent_schedule_ids:
+			if not payment.invc_id:
+				inv_line_values = payment.get_invloice_lines()
+				inv_values = {
+					'partner_id': payment.tenancy_id.tenant_id.parent_id.id or False,
+					'type': 'out_invoice',
+					'property_id': payment.tenancy_id.property_id.id or False,
+					'invoice_date': datetime.now().strftime(
+						DEFAULT_SERVER_DATE_FORMAT) or False,
+					'invoice_line_ids': inv_line_values,
+					'new_tenancy_id': payment.tenancy_id.id,
+					'numero_pagos':payment.hecho_pago,
+				}
+				invoice_id = inv_obj.create(inv_values)
+				payment.write({'invc_id': invoice_id.id, 'inv': True})
+		#publicar las facturas	
+		for payment in self.rent_schedule_ids:
+			inv_obj = self.env['account.move'].search([('id','=',payment.invc_id.id)])
+			if inv_obj.state!='posted':
+				inv_obj.action_post()
+				payment.move_check=True
 
 	def action_quotation_send(self):
 		if not self.property_id:
@@ -88,4 +115,6 @@ class Account_analytic_account_bh(models.Model):
 
 		template_id=self.env.ref('custom_property.email_template_contrato').id
 		self.env['mail.template'].browse(template_id).send_mail(self.id,force_send=True)
+		
+	
 

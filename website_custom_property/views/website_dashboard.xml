@@ -1,0 +1,51 @@
+<odoo>
+   <template id="my_properties_content">
+       <section class="welcome-area">
+           <div class="welcome-slides owl-carousel">
+               <div class="col-md-12 asset-my-property rent-single-welcome-slide bg-img bg-overlay">
+                   <div class='text-center inner-content'>
+                       <h3><strong>Mis </strong> Propiedades</h3>
+                       <ul>
+                           <li>
+                               <a href="/">Home</a>
+                           </li>
+                           <li>Mis Propiedades</li>
+                       </ul>
+                   </div>
+               </div>
+           </div>
+       </section>
+       <!-- <div class="mt32 rest feature-properties"> -->
+           <section class="recent-viewed-section section" id="my_property_section">
+               <div class="container">
+                   <!--<div class='row'>
+                   <t t-if="all_property_objs">
+                       <t t-foreach="all_property_objs" t-as="account_asset_one_lease">
+                           <t t-call="property_website.dosplay_properties" />
+                       </t>
+                   </t>
+               </div>-->
+                <div class="row">
+                  <div class="col-8">
+                     <div class="col-4">
+                       Totales de rentas
+                     </div>
+                     <div class="col-4">
+                        Contratos por vencer 
+                     </div>
+                  </div>
+                  <div class="col-4">
+                  
+                  </div>
+                </div> 
+                <div class="row">                   
+                   <div t-foreach="todos_mantenimientos" t-as="man" class="col-3">
+                      
+                   </div>
+                </div>
+               </div>
+           </section>
+           <!-- <t t-call="property_management_website.custom_footer" /> -->
+       <!-- </div> -->
+   </template>
+</odoo>
