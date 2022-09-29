@@ -24,7 +24,8 @@
 
        <xpath expr="//button[@name='button_close']" position="after">
           <button name="action_quotation_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight"/>
-                    
+          <button name="action_invoice_payment" string="Facturar todo" type="object" icon="fa-list-ol" class="oe_highlight"/>
+                 
          </xpath>
     	 <xpath expr="//field[@name='rent_schedule_ids']/tree/field[@name='start_date']" position="before">
            <field name="hecho_pago"/>
@@ -45,10 +46,7 @@
             </group>
              
          </xpath>
-        <!--  <xpath expr="//field[@name='contact_id']" position="after">
-                   
-         </xpath> -->
-         
+            
     </field>
    </record>
 
