@@ -1,0 +1,25 @@
+<odoo>
+   <template id="alert_clock" name="My alerts clock">
+    <t t-call="portal.frontend_layout">
+        <div class="container">
+           <h1>Alertas</h1>
+           <div class="table-responsive border rounded border-top-0 ">
+            <table class="table rounded mb-0 bg-white o_portal_my_doc_table">
+              <thead>
+              <th>Alerta</th>
+              <th>Propiedad</th>
+              <th>Vista</th>
+              </thead>
+              <tbody>
+                  <tr t-foreach="alerta" t-as="o">
+                     <td><t t-esc="o.actividad"/></td>
+                     <td><t t-esc="o.propiedad_id.name"/></td>
+                     <td><t t-esc="o.contratos_id.name"/></td>
+                  </tr>
+              </tbody>
+           </table>
+           </div>
+        </div>
+    </t>
+   </template>
+</odoo>

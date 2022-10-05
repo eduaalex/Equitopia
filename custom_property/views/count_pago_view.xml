@@ -1,5 +1,34 @@
 <odoo>
-  <data>
+  <data>   
+
+   <record id="custom_property_tenancy_portal_form_inheriti" model="ir.ui.view">
+    <field name="name">custom_property_tenancy_portal_form.inheriti</field>
+    <field name="model">tenant.partner</field>
+    <field name="inherit_id" ref="property_management.property_tenant_view_form"/>
+    <field name="arch" type="xml">  
+        
+         <xpath expr="//field[@name='occupation']" position="after">
+         <field name="bandera_portal" invisible="1"/>
+         <field name="portal_activo" invisible="1"/>
+          <button name="active_portal" string="Acceso portal" 
+                type="object" class="btn btn-link"
+                attrs="{'invisible': [('portal_activo','=',True)]}" />
+         </xpath>  
+       
+     </field>
+   </record>
+
+   <record id="custom_property_tenancy_form_button_inheriti" model="ir.ui.view">
+    <field name="name">custom_property_tenancy_form_button.inheriti</field>
+    <field name="model">account.analytic.account</field>
+    <field name="inherit_id" ref="property_landlord_management.landlord_analytic_view_form_id"/>
+    <field name="arch" type="xml">         
+         <xpath expr="//button[@name='landlord_button_close']" position="after">
+               <button name="action_tenancy_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight"/>
+               <button name="action_invoice_tenancy" string="Facturar todo" type="object" icon="fa-list-ol" class="oe_highlight"/>
+           </xpath>
+    </field>
+   </record>
 
    <record id="custom_property_customs_field_inheriti" model="ir.ui.view">
     <field name="name">custom_property_customs_field_move.inheriti</field>
@@ -7,8 +36,14 @@
     <field name="inherit_id" ref="om_account_asset.view_account_asset_asset_form"/>
     <field name="arch" type="xml">  
        <xpath expr="//field[@name='active']" position="after">
-           <field name="chech_in"/>
-           <field name="chech_out"/>
+           <label for="hora_entrada"/>
+                 <div>
+                   <field name="hora_entrada" widget="float_time" class="oe_inline"/> <span class="ml8">horas</span>
+                 </div>
+                 <label for="hora_salida"/>
+                 <div>
+                   <field name="hora_salida" widget="float_time" class="oe_inline"/> <span class="ml8">horas</span>
+                 </div>        
          </xpath>
          <xpath expr="//field[@name='currency_id']" position="after">
            <field name="entrega_acceso_id"/>
@@ -24,7 +59,8 @@
 
        <xpath expr="//button[@name='button_close']" position="after">
           <button name="action_quotation_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight"/>
-                    
+          <button name="action_invoice_payment" string="Facturar todo" type="object" icon="fa-list-ol" class="oe_highlight"/>
+                 
          </xpath>
     	 <xpath expr="//field[@name='rent_schedule_ids']/tree/field[@name='start_date']" position="before">
            <field name="hecho_pago"/>
@@ -32,23 +68,49 @@
           <xpath expr="//sheet/group/group[2]" position="after">
             <group  colspan="4" col="4" >
               <group colspan="2">
-                <field name="chech_in"/>
-                <field name="chech_out"/>              
+                 <label for="hora_entrada"/>
+                 <div>
+                   <field name="hora_entrada" widget="float_time" class="oe_inline" force_save="1" readonly="1"/> <span class="ml8">horas</span>
+                 </div>
+                 <label for="hora_salida"/>
+                 <div>
+                   <field name="hora_salida" widget="float_time" class="oe_inline" force_save="1" readonly="1"/> <span class="ml8">horas</span>
+                 </div>
               </group>
               <group colspan="2">
-                 <field name="entrega_acceso_id"/>
-                 <field name="email"/>
-                 <field name="telefono"/>                
+                 <field name="entrega_acceso_id" force_save="1" readonly="1"/>
+                 <field name="email" force_save="1" readonly="1"/>
+                 <field name="telefono" force_save="1" readonly="1"/>                
               </group>
 
               
             </group>
              
          </xpath>
-        <!--  <xpath expr="//field[@name='contact_id']" position="after">
-                   
-         </xpath> -->
-         
+        <xpath expr="//group/group[3]" position="after">
+                <group colspan="4">
+                   <group>
+                      <field name="chech_in"/>
+                      <label for="bandera_in_realizado"/>
+                      <div>
+                      <field name="bandera_in_realizado" class="oe_inline"/>
+                      <field name="chech_in_realizado" class="oe_inline" readonly="1" force_save="1"/>
+                      </div>                  
+                   </group>
+                   <group>
+                        <field name="chech_out"/> 
+                        <label for="bandera_out_realizado"/>
+                        <div>
+                         <field name="bandera_out_realizado" class="oe_inline"/>
+                         <field name="chech_out_realizado" class="oe_inline" readonly="1" force_save="1"/>
+                       </div>
+                       
+                   </group>
+
+                </group>
+                
+           </xpath>
+            
     </field>
    </record>
 

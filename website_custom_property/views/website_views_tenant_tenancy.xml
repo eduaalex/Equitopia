@@ -1,0 +1,43 @@
+<odoo>
+   <template id="my_properties_tenancy" name="My Tenancy">
+           <t t-call="portal.frontend_layout">
+            <div class="container">
+             <h1><t t-esc="titulo"/></h1>
+             <div class="table-responsive border rounded border-top-0 ">
+              <table class="table rounded mb-0 bg-white o_portal_my_doc_table">
+                    <thead>
+                      <tr>
+                      <th>Nombre</th>
+                      <th>Propiedad</th>
+                      <th>Inquilino</th>
+                      <th>Fecha inicio</th>
+                      <th>Fecha fin</th>
+                      <th>Tipo renta</th>
+                      <th>Renta</th>
+                      <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                       <tr t-foreach="lista_contatos" t-as="o">
+                         <td>                              
+                              <form action="/tenant_details">
+                                 <input  type="hidden" id="contrato" t-att-value="o.id" name="contrato"/>
+                                 <button type="submit" class="btn btn-link" ><t t-esc="o.name"/></button>
+                              </form>
+                         </td>
+                         <td><t t-esc="o.property_id.name"/></td>
+                         <td><t t-esc="o.tenant_id.name"/></td>
+                         <td><t t-esc="o.date_start"/></td>
+                         <td><t t-esc="o.date"/></td>
+                         <td><t t-esc="o.rent_type_id.name"/></td>
+                         <td><t t-esc="o.rent"/></td>
+                         <td><t t-esc="o.state"/></td>
+                       </tr>
+                    </tbody>
+                 </table>
+             </div>
+            </div>
+             
+           </t>
+   </template>
+</odoo>

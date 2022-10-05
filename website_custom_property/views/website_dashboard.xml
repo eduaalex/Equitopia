@@ -1,0 +1,135 @@
+<odoo>
+   <template id="my_properties_content">      
+               <div class="container">
+               <div class="card">
+               <div class="card-header">
+               <div class="row">
+                  <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12"></div>
+                  <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                    Bienvenido <strong><t t-esc="request.env['res.users'].search([('id','=',request.session.uid)]).name"/></strong>
+                  </div>
+                  <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12"> 
+                      <a class="btn btn-primary pull-left" href="/clock_alert"><i class="fas fa-clock"></i><span id="clock_alert_count"></span></a>    
+                     
+                            
+                  </div>
+               </div>
+               </div>
+               <div class="card-body">
+               <div class="row">
+               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 border">    
+                  <h5> <strong>Totales de rentas:</strong> <span t-esc="suma_per_amount"/>  
+                  <strong>Programado:</strong> <span t-esc="suma_espera"/> </h5>              
+                  <div class="table-responsive border rounded border-top-0 ">
+                   <table class="table rounded mb-0 bg-white o_portal_my_doc_table">
+                            <thead>
+                                <tr>
+                                    <th>Estado</th>
+                                    <th>Nombre</th>
+                                    <th>Rentas</th>
+                                    <th>Programado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="todos_propidades" t-as="vals">
+                                   <td><span t-esc="vals['estado']"/></td>
+                                   <td>
+                                    <form action="/property_details">
+                                      <input type="hidden" id="propiedad_evaluar" t-att-value="vals['evaluar']" name="propiedad_evaluar"/>
+                                      <button type="submit" class="btn btn-link" ><span t-esc="vals['propiedad']"/></button>
+                                   </form>
+                                   </td>
+                                   <td><span t-esc="vals['suma_debe']"/></td>  
+                                   <td><span t-esc="vals['suma_haber']"/></td>                                 
+                                </tr>
+                            </tbody>
+                       </table>
+                    </div>
+                    
+              </div>
+               
+               <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 border">
+                <h5><strong>Contratos por vencer</strong></h5>                 
+                 <u1 class="list-group list-group-flush">
+                 <li class="list-group-item">
+                   <a class="card" id="contratos_uno" href="/rango_menos_15">
+                    Vence en <strong>15 días o menos: <t t-esc="cantidad_contratos_15dia_menos"/> </strong>
+                    </a>
+                </li>
+                <li class="list-group-item">
+                <a class="card" id="contratos_dos" href="/rango_16_30">
+                  Vence en <strong>16-30 días: <t t-esc="cantidad_contratos_16_30_dias"/></strong>
+                  </a>
+                </li>
+                <li class="list-group-item">
+                <a class="card" id="contratos_tres" href="/rango_31_60">
+                  Vence en <strong>31-60 días: <t t-esc="cantidad_contratos_31_60_dias"/></strong>
+                </a>
+                </li>
+                <li class="list-group-item">
+                 <a class="card" id="contratos_tres" href="/rango_mas_60">
+                  Vence en más de<strong>60 días: <t t-esc="cantidad_contratos_mas_60_dias"/></strong>
+                  </a>
+                </li>                
+                 </u1>      
+                            
+               </div>  
+                <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 border">
+                   <h5><strong>Estado de renta</strong></h5>
+                    <select class="form-control" aria-label="Meses">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                    </select>
+                    <label for="inicio">inicio</label>
+                    <input type="date" class="form-control" name="inicio" id="inicio"/> 
+                    <label for="fin">Fin</label>
+                    <input type="date" class="form-control" name="fin" id="fin"/> 
+                    <label for="cobro_gestor">Cobradas por el gestor</label>
+                    <input type="text" class="form-control" name="cobro_gestor"  id="cobro_gestor"/>
+                    <label for="admin">Administración</label>
+                    <input type="text" class="form-control" name="admin" id="admin"/>
+                    <label for="mantenimiento">Mantenimientos</label>
+                    <input type="text" class="form-control" name="mantenimiento" id="mantenimiento"/>
+                    <label for="otros_gastos">Otros gastos</label>
+                    <input type="text" class="form-control" name="otros_gastos" id="otros_gastos"/>
+                  
+                </div>      
+               </div>  
+               <div class="row">               
+                <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 border"> 
+                  <h5><strong>Mantenimientos</strong></h5> 
+                   <div t-foreach="list_manenimientos" t-as="o"  class="border border-success">
+                          <div class="border border-secondary">
+                              <form action="/maintenance_details">
+                                 <input  type="hidden" id="mantenimiento" t-att-value="o.id" name="mantenimiento"/>
+                                <button type="submit" class="btn btn-link" >mantenimiento: <span t-esc="o.id"/>   Estado: <t t-esc="o.stage_id.name"/></button>
+                              </form>
+                                
+                          </div>
+                          <div class="border border-secondary">
+                            <span>Propiedad: <t t-esc="o.property_id.name"/></span><br/>
+                            <span>Fecha Solicitud: <t t-esc="o.request_date"/></span><br/>
+                            <span>Resposable: <t t-esc="o.user_id.name"/></span><br/>
+                          </div>
+                       </div>
+                    </div>                      
+                   
+                
+               </div>
+               </div>
+               </div>
+                
+               </div>
+           
+   </template>
+</odoo>

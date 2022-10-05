@@ -1,0 +1,10 @@
+<odoo>
+<template id="tenant_details" name="My tenant details">
+<t t-call="portal.frontend_layout">
+        <div class="container">
+         <h1>Detalles del Contrato</h1>
+         <t t-esc="contrato.name"/>
+        </div>
+</t>
+</template>
+</odoo>
