@@ -15,9 +15,18 @@
        'om_account_asset',
     ],
     'data': [
-      # 'security/ir.model.access.csv',
+       'security/ir.model.access.csv',
+       'views/website_template.xml', 
        'views/website_dashboard.xml',
        'views/my_property.xml',
+       'views/website_views_tenant_tenancy.xml',
+       'views/website_views_property_details.xml',
+       'views/website_views_maintenance_details.xml',
+       'views/Website_alert_clock.xml',
+       'views/alert_clock.xml',
+       'views/website_views_tenant_details.xml',
+
+       
     ],
    
 }

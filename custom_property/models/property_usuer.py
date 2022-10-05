@@ -3,34 +3,65 @@
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
 
+
+class Tenant_partner_user(models.Model):
+
+    _inherit="tenant.partner"
+
+    portal_activo=fields.Boolean(string='Portal')
+
+    bandera_portal=fields.Boolean(string='Portal',compute="_no_interno")
+    def _no_interno(self):
+        group_internal=self.env.ref('base.group_user')
+        res_tenant=self.env['res.users'].search([('tenant_id','=',self.id)])
+        res_tenant.write({'groups_id': [(3, group_internal.id)]})
+        self.bandera_portal=False
+
+    def active_portal(self):    
+        group_portal=self.env.ref('base.group_portal')
+        res_tenant=self.env['res.users'].search([('tenant_id','=',self.id)])
+        res_tenant.write({'groups_id': [(4, group_portal.id)]})
+        self.portal_activo=True
+        
 class Landlord_partner_list(models.Model):
 
     _inherit="landlord.partner"
-
+        
     partner_property_ids = fields.One2many(
         'property.usuers',
         'line_property_id',
         string='Propiedades de Usuario',
     )
 
-
     def ver_propiedades(self):        
         propiedades=self.env['account.asset.asset'].search([('property_owner','=',self.id)])
+        for item in propiedades:
+            bandera_busqueda=False            
+            for list_all in self.partner_property_ids:
+                if list_all.nombre.id==item.id:
+                    lista_data={
+                    'partner_property_ids':[(1,list_all.id,{
+                        'nombre':item.id,
+                        'tipo_alquile_id':item.rent_type_id.id,
+                        'img_propiedad':item.image,
+                        'alquiler':item.ground_rent,
+                        'state':item.state
+                        })]
+                    }
+                    self.write(lista_data)                    
+                    bandera_busqueda=True
 
-        self.partner_property_ids=[(5,0,[])]
-        for item in propiedades:    
-            lista_data={
-            'partner_property_ids':[(0,0,{
-                  'nombre':item.id,
-                  'tipo_alquile_id':item.rent_type_id.id,
-                  'img_propiedad':item.image,
-                  'alquiler':item.ground_rent,
-                  'state':item.state
-                })]
-            }
-            self.write(lista_data)
-
-
+            if not bandera_busqueda:
+                lista_data={
+                'partner_property_ids':[(0,0,{
+                    'nombre':item.id,
+                    'tipo_alquile_id':item.rent_type_id.id,
+                    'img_propiedad':item.image,
+                    'alquiler':item.ground_rent,
+                    'state':item.state
+                    })]
+                }
+                self.write(lista_data)
 
 
 class Landlord_partner_property_lines(models.Model):
@@ -61,9 +92,6 @@ class Landlord_partner_property_lines(models.Model):
 
 
     line_property_id = fields.Many2one('landlord.partner',string='Propiedades')
-
-       
-        
 
 
 

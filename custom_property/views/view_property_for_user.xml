@@ -14,6 +14,7 @@
                         class="oe_highlight"/>
         </header>
        </xpath>  
+      
     	 <xpath expr="//page[@name='accounting']" position="after">
             <page string="Mis Propiedades" name="property_users">
               <group colspan="1">

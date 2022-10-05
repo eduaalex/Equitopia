@@ -6,7 +6,7 @@
     </template>     
 
     <template id="my_properties_onload" name="My Properties">
-           <t t-call="website.layout">
+           <t t-call="portal.frontend_layout">
                <t t-call="website_custom_property.my_properties_content" />
            </t>
    </template>
