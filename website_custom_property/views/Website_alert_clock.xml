@@ -8,7 +8,7 @@
               <thead>
               <th>Alerta</th>
               <th>Propiedad</th>
-              <th>Vista</th>
+              <th>Contrato</th>
               </thead>
               <tbody>
                   <tr t-foreach="alerta" t-as="o">

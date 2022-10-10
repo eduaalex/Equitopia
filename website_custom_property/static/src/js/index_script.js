@@ -8,8 +8,10 @@ odoo.define('custom_property_clock_alert', function (require) {
             
         });
     }
-
-    setInterval(load_alert,30000)
-
+    var loggin=$("#loggin").val()
+    if(loggin>0){
+        setInterval(load_alert,30000);
+    }    
 
 });
+

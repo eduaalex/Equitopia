@@ -1,8 +1,6 @@
-
 #-*- coding: utf-8 -*-
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
-
 class Website_consult(models.Model):
 
     _name='alert.clock'
@@ -38,23 +36,6 @@ class Website_payment_tenancy(models.Model):
             'contratos_id':self.tenancy_id.id,
             'duenos_id':self.property_id.property_owner.id,
         })
-        return res
-
-class Wesite_new_tenant(models.Model):
-
-    _inherit='account.analytic.account'
-    
-  #  @api.model
-    def button_start(self):
-        res=super(Wesite_new_tenant,self).button_start()
-
-        data={
-            'actividad':'new_tenancy',
-            'propiedad_id':self.property_id.id,
-            'contratos_id':self._origin.id,
-            'duenos_id':self.property_owner_id.id
-        }
-        self.env['alert.clock'].create(data)
         return res
 
 

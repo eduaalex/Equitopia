@@ -19,6 +19,7 @@
        'views/website_template.xml', 
        'views/website_dashboard.xml',
        'views/my_property.xml',
+       'views/propietario_calendario.xml',
        'views/website_views_tenant_tenancy.xml',
        'views/website_views_property_details.xml',
        'views/website_views_maintenance_details.xml',

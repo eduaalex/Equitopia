@@ -1,6 +1,7 @@
 
 #-*- coding: utf-8 -*-
 from datetime import date, datetime
+from re import S
 
 from odoo import models, fields, api,_
 from odoo.exceptions import UserError
@@ -47,6 +48,16 @@ class Account_asset_asset_customs(models.Model):
 	hora_salida = fields.Float(string='Hora de salida')
 
 	entrega_acceso_id = fields.Many2one('res.partner',string='Entrega de accesos')
+
+	count_reg=fields.Integer(compute="_calculo_registro")
+
+	def _calculo_registro(self):
+		"""
+		suma la cantidad de eventos de calendario
+		"""
+		for rec in self:
+			rec.count_reg=self.env['calendar.event'].search_count([('property_calendary','=',rec.id)])
+
 
 
 class Account_analytic_account_bh(models.Model):
@@ -100,6 +111,9 @@ class Account_analytic_account_bh(models.Model):
 
 
 	def set_number_pay(self):
+		"""
+		crear listado de nombre para la facturacion
+		"""
 		pago=1
 		total_hecho=len(self.rent_schedule_ids)
 		for rec in self.rent_schedule_ids:
@@ -164,9 +178,50 @@ class Account_analytic_account_bh(models.Model):
 			if inv_obj.state!='posted':
 				inv_obj.action_post()
 				payment.move_check=True
+	
+	def button_cancel_tenancy(self):
+		res=super(Account_analytic_account_bh,self).button_cancel_tenancy()
+		self.env['alert.clock'].search([('contratos_id','=',self.id)]).unlink()
+		self.env['calendar.event'].search([('property_tanency','=',self.id)]).unlink()
+		return res
+
+	def button_start(self):
+		res=super(Account_analytic_account_bh,self).button_start()
+		if not self.property_owner_id:
+			raise UserError("El campo de dueño esta vacio")
+		data={
+            'actividad':'new_tenancy',
+            'propiedad_id':self.property_id.id,
+            'contratos_id':self._origin.id,
+            'duenos_id':self.property_owner_id.id
+        }
+		self.env['alert.clock'].create(data)
+		partner_ids=self.env.user.partner_id.ids
+		if self.manager_id:
+			partner_ids.append(self.manager_id.partner_id.id)
+		if self.property_owner_id:
+			partner_ids.append(self.property_owner_id.parent_id.id)
+		
+		data_calendary={
+        'name':self.property_id.name+":"+self.code+"/"+self.tenant_id.name,
+        'partner_ids':partner_ids,
+		  'start_date':self.date_start,
+        'stop_date':self.date, 
+        'start':self.date_start,
+        'stop':self.date,
+        'allday':True,
+        'property_calendary':self.property_id.id,  
+        'property_tanency':self.id,
+        }
+		self.env['calendar.event'].create(data_calendary)
+		return res
 				
 
 	def action_quotation_send(self):
+		"""
+		envia correo electronico de los contratos de inquilino
+		valida sus respetivos remitentes y destinatarios
+		"""
 		if not self.manager_id:
 			raise UserError("No cuenta con el remitente ")
 		if not self.tenant_id:
@@ -178,6 +233,10 @@ class Account_analytic_account_bh(models.Model):
 		self.env['mail.template'].browse(template_id).send_mail(self.id,force_send=True)
 
 	def action_tenancy_send(self):
+		"""
+		Envia correo electronico de los contratos de propietario
+		valida sus respetivos remitentes y destinatarios
+		"""
 		if not self.property_owner_id:
 			raise UserError("No cuenta con el remitente ")
 		if not self.contact_id:

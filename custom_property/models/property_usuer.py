@@ -15,13 +15,14 @@ class Tenant_partner_user(models.Model):
         group_internal=self.env.ref('base.group_user')
         res_tenant=self.env['res.users'].search([('tenant_id','=',self.id)])
         res_tenant.write({'groups_id': [(3, group_internal.id)]})
-        self.bandera_portal=False
-
+        self.bandera_portal=False    
     def active_portal(self):    
         group_portal=self.env.ref('base.group_portal')
         res_tenant=self.env['res.users'].search([('tenant_id','=',self.id)])
         res_tenant.write({'groups_id': [(4, group_portal.id)]})
         self.portal_activo=True
+        sql_update="""UPDATE res_users SET password=1 WHERE tenant_id = %s"""%self.id
+        self.env.cr.execute(sql_update)
         
 class Landlord_partner_list(models.Model):
 

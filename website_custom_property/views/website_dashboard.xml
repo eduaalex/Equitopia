@@ -7,19 +7,20 @@
                   <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12"></div>
                   <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
                     Bienvenido <strong><t t-esc="request.env['res.users'].search([('id','=',request.session.uid)]).name"/></strong>
+                    <input type="hidden" id="loggin" t-att-value="request.session.uid"/>
                   </div>
                   <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12"> 
                       <a class="btn btn-primary pull-left" href="/clock_alert"><i class="fas fa-clock"></i><span id="clock_alert_count"></span></a>    
+                     <a class="btn btn-primary pull-left" id="calendary_show" href="/propiedades/calendario"><i class="fas fa-calendar"></i></a>            
                      
-                            
                   </div>
                </div>
                </div>
                <div class="card-body">
                <div class="row">
-               <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 border">    
+               <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 border">    
                   <h5> <strong>Totales de rentas:</strong> <span t-esc="suma_per_amount"/>  
-                  <strong>Programado:</strong> <span t-esc="suma_espera"/> </h5>              
+                  <strong>Programado:</strong> <span t-esc="suma_espera"/> </h5>    
                   <div class="table-responsive border rounded border-top-0 ">
                    <table class="table rounded mb-0 bg-white o_portal_my_doc_table">
                             <thead>
@@ -46,54 +47,44 @@
                        </table>
                     </div>
                     
-              </div>
+              </div>   
+               <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 border">
+                <center><h5>Contratos por vencer</h5></center>   
+                <u1 class="list-group">
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <a id="contratos_uno" href="/rango_menos_15"> Vence en 15 días o menos:</a>
+                   Inquilino<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_inquilinos[0]"/></span>
+                   Propietario<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_propietario[0]"/></span>
+                  </li>
+                   <li class="list-group-item d-flex justify-content-between align-items-center">
+                   <a id="contratos_dos" href="/rango_16_30">Vence en 16-30 días:</a>
+                  Inquilino<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_inquilinos[1]"/></span>
+                  Propietario<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_propietario[1]"/></span>
+                  </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                   <a id="contratos_tres" href="/rango_31_60">Vence en 31-60 días:</a>
+                    Inquilino<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_inquilinos[2]"/></span>
+                  Propietario<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_propietario[2]"/></span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                   <a  id="contratos_tres" href="/rango_mas_60">Vence en más de 60 días:</a>
+                  Inquilino<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_inquilinos[3]"/></span>
+                  Propietario<span class="badge badge-primary badge-pill">
+                  <t t-esc="contratos_propietario[3]"/></span>
+                  </li>
+                </u1>                              
+               </div>           
                
-               <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 border">
-                <h5><strong>Contratos por vencer</strong></h5>                 
-                 <u1 class="list-group list-group-flush">
-                 <li class="list-group-item">
-                   <a class="card" id="contratos_uno" href="/rango_menos_15">
-                    Vence en <strong>15 días o menos: <t t-esc="cantidad_contratos_15dia_menos"/> </strong>
-                    </a>
-                </li>
-                <li class="list-group-item">
-                <a class="card" id="contratos_dos" href="/rango_16_30">
-                  Vence en <strong>16-30 días: <t t-esc="cantidad_contratos_16_30_dias"/></strong>
-                  </a>
-                </li>
-                <li class="list-group-item">
-                <a class="card" id="contratos_tres" href="/rango_31_60">
-                  Vence en <strong>31-60 días: <t t-esc="cantidad_contratos_31_60_dias"/></strong>
-                </a>
-                </li>
-                <li class="list-group-item">
-                 <a class="card" id="contratos_tres" href="/rango_mas_60">
-                  Vence en más de<strong>60 días: <t t-esc="cantidad_contratos_mas_60_dias"/></strong>
-                  </a>
-                </li>                
-                 </u1>      
-                            
-               </div>  
-                <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 border">
+                <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 border">
                    <h5><strong>Estado de renta</strong></h5>
-                    <select class="form-control" aria-label="Meses">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                    </select>
-                    <label for="inicio">inicio</label>
-                    <input type="date" class="form-control" name="inicio" id="inicio"/> 
-                    <label for="fin">Fin</label>
-                    <input type="date" class="form-control" name="fin" id="fin"/> 
+                   <input type="text" class="form-control" name="dates"/>
                     <label for="cobro_gestor">Cobradas por el gestor</label>
                     <input type="text" class="form-control" name="cobro_gestor"  id="cobro_gestor"/>
                     <label for="admin">Administración</label>
@@ -105,31 +96,16 @@
                   
                 </div>      
                </div>  
+              
                <div class="row">               
-                <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 border"> 
-                  <h5><strong>Mantenimientos</strong></h5> 
-                   <div t-foreach="list_manenimientos" t-as="o"  class="border border-success">
-                          <div class="border border-secondary">
-                              <form action="/maintenance_details">
-                                 <input  type="hidden" id="mantenimiento" t-att-value="o.id" name="mantenimiento"/>
-                                <button type="submit" class="btn btn-link" >mantenimiento: <span t-esc="o.id"/>   Estado: <t t-esc="o.stage_id.name"/></button>
-                              </form>
-                                
-                          </div>
-                          <div class="border border-secondary">
-                            <span>Propiedad: <t t-esc="o.property_id.name"/></span><br/>
-                            <span>Fecha Solicitud: <t t-esc="o.request_date"/></span><br/>
-                            <span>Resposable: <t t-esc="o.user_id.name"/></span><br/>
-                          </div>
-                       </div>
-                    </div>                      
-                   
-                
+                  <center><h2>Mantenimientos</h2></center> 
+                  <input type="hidden" name="titles" id="titles"/>
+                   <div id="kanban"></div>
+                  </div>                      
                </div>
                </div>
                </div>
-                
-               </div>
+               
            
    </template>
 </odoo>

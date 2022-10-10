@@ -6,116 +6,100 @@
 				<t t-call="web.external_layout">
 					<div class="page">
 						<!--inici codigo-->
-						<br/><br/><br/>
+						
 						<h1 style="text-align:center;"><strong> DETALLES DE CONTRATO</strong></h1>
 						<div class="row">
 							<div class="col-3">
-									<strong>Contrato</strong><br/>
-									<t t-esc="doc.name"/>
+									<strong>Contrato</strong>: <t t-esc="doc.name"/>
 							</div>
 							<div class="col-3">
 									<br/><t t-esc="doc.code"/>
 							</div>
-						</div>
-					  <div class="row">
+						</div>					  
+					  <section class="row">
 					  	  <h4>Informacion de propiedad</h4> 
-								
+							<br/>	
 							<div class="col-6">
-									<strong>Propiedad</strong><br/>
-									<t t-esc="doc.property_id.name"/>
-									<strong>Gerente de cuenta</strong><br/>
-									<t t-esc="doc.manager_id.name"/>
+									<strong>Propiedad</strong>
+									<t t-esc="doc.property_id.name"/><br/>
+									<strong>Gerente de cuenta</strong>
+									<t t-esc="doc.manager_id.name"/><br/>
 									<strong>Moneda</strong><br/>
 									<t t-ecc="doc.currency_id.name"/>
 							</div>
 							<div class="col-6">
-								<strong>Inquilino</strong><br/>
-									<t t-esc="doc.tenant_id.name"/>
-									<strong>Gerente de cuenta</strong><br/>
-									<t t-esc="doc.company_id.name"/>
+								<strong>Inquilino</strong>
+								<t t-esc="doc.tenant_id.name"/><br/>
+								<strong>Gerente de cuenta</strong>
+								<t t-esc="doc.company_id.name"/><br/>
 									
 							</div>
 
-           			</div>
-           			 <div class="row">
+           			</section>
+           			 <section class="row">
 					  	  <h4>Informacion sobre el alquiler</h4> 
-								
+							<br/>	
 							<div class="col-6">
-									<strong>Alquiler de la propiedad</strong><br/>
-									<t t-esc="doc.rent"/>
-									<strong>Importe depositado</strong><br/>
-									<t t-esc="doc.deposit"/>
-									<strong>¿Depósito recibido?</strong><br/>
-									<t t-esc="doc.deposit_received"/>
-									<strong>Contacto</strong><br/>
-									<t t-esc="doc.contact_id"/>
-									<strong>Check in</strong><br/>
-									<t t-esc="doc.chech_in"/>
-									<strong>Check out</strong><br/>
-									<t t-esc="doc.chech_out"/>
+									<strong>Alquiler de la propiedad</strong>: <t t-esc="doc.rent"/><br/>
+									<strong>Importe depositado</strong>: <t t-esc="doc.deposit"/><br/>
+									<strong>¿Depósito recibido?</strong>: <t t-esc="doc.deposit_received"/><br/>
+									<strong>Contacto</strong>: <t t-esc="doc.contact_id"/><br/>
+									<strong>Check in</strong>: <t t-esc="doc.chech_in"/><br/>
+									<strong>Check out</strong>: <t t-esc="doc.chech_out"/><br/>
 							</div>
 							<div class="col-6">
 								<strong>Fecha</strong><br/>
 									<t t-esc="doc.ten_date"/>
-									<strong>Depósito devuelto</strong><br/>
-									<t t-esc="doc.amount_return"/>
-										<strong>Consto de mantenimiento</strong><br/>
-									<t t-esc="doc.main_cost"/>
-									<strong>Entrega de accesos</strong><br/>
-									<t t-esc="doc.entrega_acceso_id.name"/>
-										<strong>Correo</strong><br/>
-									<t t-esc="doc.email"/>
-									<strong>Telefono</strong><br/>
-									<t t-esc="doc.telefono"/>
+									<strong>Depósito devuelto</strong>: <t t-esc="doc.amount_return"/><br/>
+									<strong>Consto de mantenimiento</strong>: <t t-esc="doc.main_cost"/><br/>
+									<strong>Entrega de accesos</strong>: <t t-esc="doc.entrega_acceso_id.name"/><br/>
+										<strong>Correo</strong>: <t t-esc="doc.email"/><br/>
+									<strong>Telefono</strong>: <t t-esc="doc.telefono"/><br/>
 									
 							</div>
 
-           			</div>
-           			 <div class="row">
+           			</section>
+           			 <section class="row">
 					  	  <h4>Informacion de contrato</h4> 
-								
+							<br/>	
 							<div class="col-6">
-									<strong>Fecha de inicio</strong><br/>
-									<t t-esc="doc.date_start"/>
-									<strong>tipo de alquiler</strong><br/>
-									<t t-esc="doc.rent_type_id"/>
+									<strong>Fecha de inicio</strong>: <t t-esc="doc.date_start"/><br/>
+									<strong>tipo de alquiler</strong>: <t t-esc="doc.rent_type_id.name"/><br/>
 									
 							</div>
 							<div class="col-6">
-								<strong>Fecha de caducidad</strong><br/>
-									<t t-esc="doc.date"/>
-									<strong>Alquiler total</strong><br/>
-									<t t-esc="doc.total_rent"/>
+								<strong>Fecha de caducidad</strong>: <t t-esc="doc.date"/><br/>
+									<strong>Alquiler total</strong>: <t t-esc="doc.total_rent"/><br/>
 									
 							</div>
 
-           			</div>
-           			 <div class="row">
+           			</section>
+           			 <!-- <div class="row">
 					  	  <h4>Informacion de la comisión</h4> 
 								
-							<div class="col-6">
+							<div t-if="doc.commission" class="col-6">
 									<strong>Comisión</strong><br/>
 									<t t-esc="doc.commission"/>
 									
 							</div>
 
-           			</div>
-           			<div class="row">
+           			</div> -->
+           			<section class="row">
 					  	  <h4>Informacion de la Penalizaciones</h4> 
-								
+							<br/>	
 							<div class="col-6">
-									<strong>Multa %</strong><br/>
-									<t t-esc="doc.penalty"/>
+									<strong>Multa %</strong>: <t t-esc="doc.penalty"/><br/>
 									
 							</div>
 								<div class="col-6">
-									<strong>Recuento de multas por dia</strong><br/>
-									<t t-esc="doc.penalty_day"/>
+									<strong>Recuento de multas por dia</strong>: <t t-esc="doc.penalty_day"/><br/>
 									
 							</div>
 
-           			</div>
-           			<div>Horario de alquiler</div>
+           			</section>
+           			<section>
+					<h4>Horario de alquiler</h4>
+					<br/>
            			<table class="table table-sm table-bordered">
 						<thead>
 							<tr>
@@ -148,7 +132,10 @@
 						  </t>
 						</tbody>
 					</table>
-					<div>Mantenimiento periódico</div>
+					</section>
+					<section>
+					<h4>Mantenimiento periódico</h4>
+					<br/>
 					<table class="table table-sm table-bordered">
 						<thead>
 							<tr>
@@ -165,21 +152,22 @@
 						  </t>
 						</tbody>
 					</table>
+					</section>
 
-           			<div class="row">
+           			<section class="row">
 					
 							<div class="col-6">
-									<strong>Terminos y condiciones %</strong><br/>
-									<t t-esc="doc.description"/>
+									<strong>Terminos y condiciones %</strong>: 
+									<t t-esc="doc.description"/><br/>
 									
 							</div>
 								<div class="col-6">
-									<strong>Notas</strong><br/>
-									<t t-esc="doc.duration_cover"/>
+									<strong>Notas</strong>: 
+									<t t-esc="doc.duration_cover"/><br/>
 									
 							</div>
 
-           			</div>
+           			</section>
 
 					
 

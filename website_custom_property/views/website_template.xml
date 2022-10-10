@@ -4,10 +4,24 @@
        
        <xpath expr="script[last()]" position="after">
        <script type="text/javascript" src="/website_custom_property/static/src/js/index_script.js"/>
+       <!--kanban plugin-->
+       <script type="text/javascript" src="/website_custom_property/static/src/js/kanban.min.js"/>
+       <script type="text/javascript" src="/website_custom_property/static/src/js/new_view_kanban.js"/>
+       <!--datepiker-->
+       <script type="text/javascript" src="/website_custom_property/static/src/js/moment.min.js"></script>
+       <script type="text/javascript" src="/website_custom_property/static/src/js/daterangepicker.js"></script>
+       <script type="text/javascript" src="/website_custom_property/static/src/js/date_range.js"/>       
+        <!--Fullcalendar-->
+       <script type="text/javascript" src="/website_custom_property/static/src/js/lib/fullcalendar.min.js"/>
+      <script type="text/javascript" src="/website_custom_property/static/src/js/calendario.js"/>
+      <script type="text/javascript" src="/website_custom_property/static/src/js/lib/es.js"/>
        </xpath>
+      
       <xpath expr="." position="inside">
        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-     
+       <link rel="stylesheet" href="/website_custom_property/static/src/css/kanban.min.css" />
+       <link rel="stylesheet" type="text/css" href="/website_custom_property/static/src/css/daterangepicker.css" />
+       <link rel="stylesheet" href="/website_custom_property/static/src/css/main.min.css"/>
       </xpath>
 </template>
 </odoo>

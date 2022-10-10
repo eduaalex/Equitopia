@@ -1,0 +1,47 @@
+<odoo>
+	<data>
+
+		<record id="property_view_calendar_property_manager" model="ir.ui.view">
+		   <field name="name">property_view_calendar_property_manager</field>
+		   <field name="model">calendar.event</field>
+		   <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+    	   <field name="arch" type="xml">
+		       <xpath expr="//field[@name='location']" position="after">
+		         <field name="property_calendary" />
+				 <field name="property_tanency"/>
+		       </xpath>  
+		   </field>
+		</record>
+
+
+	     <record model="ir.actions.act_window" id="accion_custom_calendary_manager">
+          <field name="name">Property Manager</field>
+          <field name="res_model">calendar.event</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="view_mode">calendar,tree,form</field>
+          <field name="domain">[('property_calendary','=',active_id)]</field>
+          </record>
+
+		<record id="property_view_calendar" model="ir.ui.view">
+		   <field name="name">property.calendar</field>
+		   <field name="model">account.asset.asset</field>
+		   <field name="inherit_id" ref="om_account_asset.view_account_asset_asset_form"/>
+		   <field name="arch" type="xml">
+		         <xpath expr="//div[@name='button_box']" position="inside">	
+               <button class="oe_stat_button"
+                       icon="fa-calendar"
+                       help="Calendario"
+                       type="action"
+                       name="%(accion_custom_calendary_manager)d">
+               <field string="Calendario"
+                name="count_reg"
+                widget="statinfo"
+                 /> 
+           </button>
+           </xpath>
+                      
+           </field>
+		</record>
+		
+	</data>
+</odoo>
