@@ -24,7 +24,8 @@
     <field name="inherit_id" ref="property_landlord_management.landlord_analytic_view_form_id"/>
     <field name="arch" type="xml">         
          <xpath expr="//button[@name='landlord_button_close']" position="after">
-               <button name="action_tenancy_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight"/>
+               <button name="action_tenancy_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight" 
+                />
                <button name="action_invoice_tenancy" string="Facturar todo" type="object" icon="fa-list-ol" class="oe_highlight"/>
            </xpath>
     </field>
@@ -45,9 +46,42 @@
                    <field name="hora_salida" widget="float_time" class="oe_inline"/> <span class="ml8">horas</span>
                  </div>        
          </xpath>
+
          <xpath expr="//field[@name='currency_id']" position="after">
            <field name="entrega_acceso_id"/>
          </xpath>
+        <xpath expr="//notebook" position="inside">
+           <page string="Tarifas de propiedad" name="tarifas_propiedad">
+                <field name="tarifa_de_propiedad">
+                    <tree editable="bottom" string="Tarifas de propiedad">
+                        <field name="tipo_tarifa"/>
+                        <field name="tipo_renta"/>
+                        <field name="costo_tarifa" options="{'currency_field': 'currency_id'}"/>
+                        <field name="fecuencia_de_pagos"/>
+                        <field name="deposito" options="{'currency_field': 'currency_id'}"/>
+                        <field name="company_id" invisible="1"/> 
+                        <field name="currency_id" invisible="1"/>
+                        <field name="propiedad_id" invisible="1"/>
+                    </tree>
+                    <form>
+                        <group>
+                            <group>
+                                 <field name="tipo_tarifa"/>
+                                 <field name="tipo_renta"/>
+                                 <field name="costo_tarifa"/>
+                                 
+                            </group>
+                            <group>
+                               <field name="fecuencia_de_pagos"/>
+                                <field name="deposito"/>
+                            </group>
+                        </group>
+
+                    </form>
+                </field>    
+           </page>
+         </xpath>
+
     </field>
    </record> 
 
@@ -57,6 +91,12 @@
     <field name="inherit_id" ref="property_management.property_analytic_view_form"/>
     <field name="arch" type="xml">  
 
+        <xpath expr="//field[@name='contact_id']" position="after">
+           <field name="tipo_tarifa" required="1"/>       
+         </xpath>
+       <xpath expr="//button[@name='button_start']" position="replace">
+        <button name="calcular_precios_renta" string="Inicio" states="draft"  type="object" icon="fa-play" class="oe_highlight"/>
+       </xpath> 
        <xpath expr="//button[@name='button_close']" position="after">
           <button name="action_quotation_send" string="Enviar correo" type="object" icon="fa-envelope" class="oe_highlight"/>
           <button name="action_invoice_payment" string="Facturar todo" type="object" icon="fa-list-ol" class="oe_highlight"/>
@@ -64,6 +104,12 @@
          </xpath>
     	 <xpath expr="//field[@name='rent_schedule_ids']/tree/field[@name='start_date']" position="before">
            <field name="hecho_pago"/>
+         </xpath>
+         <xpath expr="//field[@name='rent_schedule_ids']/tree/field[@name='pen_amt']" position="before">
+           <field name="payment_echo" force_save="1" sum="Total"/>
+         </xpath>
+         <xpath expr="//field[@name='rent_schedule_ids']/tree/field[@name='pen_amt']" position="replace">
+           <field name="pen_amt" sum="Total"/>
          </xpath>
           <xpath expr="//sheet/group/group[2]" position="after">
             <group  colspan="4" col="4" >
@@ -90,7 +136,8 @@
         <xpath expr="//group/group[3]" position="after">
                 <group colspan="4">
                    <group>
-                      <field name="chech_in"/>
+                      <field name="chech_in" required="1" widget="daterange" 
+                        options="{'related_end_date': 'chech_out'}"/>
                       <label for="bandera_in_realizado"/>
                       <div>
                       <field name="bandera_in_realizado" class="oe_inline"/>
@@ -98,7 +145,8 @@
                       </div>                  
                    </group>
                    <group>
-                        <field name="chech_out"/> 
+                        <field name="chech_out" required="1" widget="daterange" 
+                            options="{'related_start_date': 'chech_in'}"/> 
                         <label for="bandera_out_realizado"/>
                         <div>
                          <field name="bandera_out_realizado" class="oe_inline"/>
@@ -106,6 +154,9 @@
                        </div>
                        
                    </group>
+                    <group string="Fechas ocupadas">
+                         <field name="rate_busy" nolabel="1" readonly="1"/>
+                    </group>
 
                 </group>
                 

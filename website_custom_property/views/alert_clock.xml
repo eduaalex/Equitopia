@@ -5,33 +5,16 @@
     <field name="name">website_custom_property_tree.inheriti</field>
     <field name="model">alert.clock</field>
     <field name="arch" type="xml">  
-    	  <tree create="false" edit="false" delete="false">
+    	  <tree create="false" edit="false">
              <field  name="actividad"/>
              <field  name="propiedad_id"/>
              <field  name="contratos_id"/>
             <field name="duenos_id"/>
+            <field name="marcarleido"/>
           </tree>
     </field>
    </record>
-    <!--FORM-->
-
-     <!-- <record id="website_custom_property_form_inheriti" model="ir.ui.view">
-    <field name="name">website_custom_property_form.inheriti</field>
-    <field name="model">alert.clock</field>
-    <field name="arch" type="xml">         
-         <form>
-          <sheet>
-            <group>
-                <field  name="actividad"/>
-             <field  name="propiedad_id"/>
-             <field  name="contratos_id"/>
-            <field name="duenos_id"/>
-            </group>
-            </sheet>
-         </form>
-       
-    </field>
-   </record> -->
+   
 
    <!--menu-->
     <record id="action_custom_alert_clock" model="ir.actions.act_window">

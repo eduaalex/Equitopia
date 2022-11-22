@@ -1,7 +1,9 @@
 <odoo>
   <template id="my_property_link" name="Link to frontend portal" inherit_id="portal.frontend_layout">
         <xpath expr="//a[@id='o_logout']" position="before">
-            <a href="/my_properties" role="menuitem" id="menu_property" class="dropdown-item">Mis propiedades</a>
+            <a href="/my_properties" role="menuitem" id="menu_property" 
+            groups="website_custom_property.group_portal_dashbord"
+            class="dropdown-item">Mis propiedades</a>
             
         </xpath>
     </template>     

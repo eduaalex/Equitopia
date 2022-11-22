@@ -3,7 +3,36 @@
     <t t-call="portal.frontend_layout">
         <div class="container">
          <input type="hidden" id="calendary_data" value="cl"/>
-         <div id='fullcalendar_property'></div>
+         <div class="d-flex flex-row-reverse">
+                <div class="p-2">
+                   <a class="btn btn-primary"  href="/my_properties"><i class="fa fa-home"></i></a>
+                </div>
+            </div> 
+
+            <h1>Calendario de reservaciones de propiedades</h1>                 
+            <input type="hidden" id="users" name="users" t-att-value="request.session.uid"/>
+            <div class="row">
+              <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12">
+                  <button type="btn" style="display:none" id="siguiente" name="siguiente">1</button>
+                  <button type="btn" style="display:none" id="atraz" name="atraz">0</button>
+                  <input type="text" id="fecha_search" name="fecha_search" style="display:none"/>
+                  <div id="data_propiedad">                    
+                  </div> 
+                 <!--  <div id="total_total"><div>  -->      
+                 
+              </div>
+              <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12" id='fullcalendar_property'></div>
+              <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12">
+                <div class="card">
+                <label for="property_search">Selecciona una propiedad</label>
+                <div id="property_search">                  
+                </div>   
+                            
+                 </div>
+              </div>              
+            </div>
+                    
+         
            <!-- Modal -->
             <div class="modal fade" id="modalcalendario" tabindex="-1" role="dialog" aria-labelledby="modalcalendario" aria-hidden="true">
               <div class="modal-dialog" role="document">
@@ -16,6 +45,7 @@
                   </div>
                   <div class="modal-body">
                     <form>
+                    <input id="item_id"  name='item_id' type='hidden' readonly="1"/>  
                     <div class="row">
                       <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
                         <div class="form-group">
@@ -58,11 +88,28 @@
                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
                         <div class="form-group">
                        <a class="btn btn-primary pull-left" id="item_mas">
-                        <i class="fas fa-link" style='color:red'>></i></a>  
+                        <i class="fas fa-link"></i></a>  
                     </div>
                       </div>
                       
-                    </div>          
+                    </div>    
+
+                    <div class="row">
+                       <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                            <div class="form-group">
+                            <label for="item_progamado">Progamado</label>
+                            <input id="item_progamado"  class="form-control o_website_form_input item_progamado" name='item_progamado' type='text' readonly="1"/>
+                            <small>Programado</small>
+                        </div>
+                      </div>
+                      <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                            <div class="form-group">
+                          <label for="item_recibido">Recibido</label>
+                          <input id="item_recibido"  class="form-control o_website_form_input item_recibido"  name='item_recibido' type='text' readonly="1"/>
+                          <small>Recibido</small>
+                        </div>
+                      </div>
+                    </div>      
                     
                   </form>
 

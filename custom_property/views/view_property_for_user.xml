@@ -5,7 +5,20 @@
     <field name="name">custom_property_landlord_partner.inheriti</field>
     <field name="model">landlord.partner</field>
     <field name="inherit_id" ref="property_landlord_management.property_landlord_partner_form_id"/>
-    <field name="arch" type="xml">
+    <field name="arch" type="xml"> 
+
+        <xpath expr="//field[@name='vat']" position="after">
+         <field name="bandera_portal" invisible="1"/>
+         <field name="portal_activo" invisible="1"/>
+          <button name="active_portal" string="Acceso portal" 
+                type="object" class="btn btn-link"
+                attrs="{'invisible': [('portal_activo','=',True)]}" />
+         </xpath> 
+
+       <xpath expr="//field[@name='is_owner']" position="after">
+        <field name="dashbord" invisible="1"/>
+       
+       </xpath>
        <xpath expr="//sheet" position="before">
         <header>
          <button string="Actualizar propiedades"

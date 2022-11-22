@@ -146,7 +146,7 @@
 						<tbody>
 							<t t-foreach="doc.cost_id" t-as="temp">
 							<tr>
-							<td><t t-esc="temp.maint_type"/></td>	
+							<td><t t-esc="temp.maint_type.name"/></td>	
 							<td><t t-esc="temp.cost"/></td>
 						  </tr>
 						  </t>

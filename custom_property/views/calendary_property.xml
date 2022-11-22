@@ -8,8 +8,9 @@
     	   <field name="arch" type="xml">
 		       <xpath expr="//field[@name='location']" position="after">
 		         <field name="property_calendary" />
-				 <field name="property_tanency"/>
-		       </xpath>  
+		         <field name="property_tanency"/>
+		       
+		       </xpath>  			   
 		   </field>
 		</record>
 

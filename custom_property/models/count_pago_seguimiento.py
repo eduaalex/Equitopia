@@ -1,13 +1,14 @@
 
 #-*- coding: utf-8 -*-
 from datetime import date, datetime
-from re import S
-
+import pytz
 from odoo import models, fields, api,_
-from odoo.exceptions import UserError
-
+from odoo.exceptions import UserError,ValidationError
+import math
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from dateutil.relativedelta import relativedelta
+import pytz
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 class Rent_type_get(models.Model):
 
 	_inherit="rent.type"
@@ -24,6 +25,22 @@ class Landlord_partner_hp(models.Model):
 	_inherit='tenancy.rent.schedule'
 
 	hecho_pago = fields.Char(string='H/P')
+
+	payment_echo = fields.Float(
+	    string='Pago Hecho',
+	    compute="diff_count",
+	    
+
+	)
+	@api.depends("pen_amt","amount")
+	def diff_count(self):
+		for rec in self:
+			temp=rec.amount-rec.pen_amt
+			if temp:
+				rec.payment_echo=temp
+			else:
+				rec.payment_echo=0.0
+
 
 
 	def create_invoice(self):
@@ -51,6 +68,36 @@ class Account_asset_asset_customs(models.Model):
 
 	count_reg=fields.Integer(compute="_calculo_registro")
 
+	tarifa_de_propiedad = fields.One2many(
+	    'rental.rates',
+	    'propiedad_id',
+	    string='Tarifa de propiedad',
+	)
+
+	@api.constrains('tarifa_de_propiedad')
+	def _exite_rental_rates(self):
+		for rec in self:
+			existe_dict_lines_tarifas={}
+			#existe_reacord_lines_tarifa=[]
+			#existe_reacord_lines_renta=[]
+			for line in rec.tarifa_de_propiedad:
+				#raise UserError(line.tipo_tarifa)
+				if not line.tipo_tarifa:
+					raise ValidationError("Un campo de tarifa esta vacio")
+				if not line.tipo_renta:
+					raise ValidationError("Un campo de tipo de renta esta vacio")
+				for item in existe_dict_lines_tarifas.keys():
+					if line.tipo_tarifa==item and line.tipo_renta==existe_dict_lines_tarifas[item]:
+						raise ValidationError("No puede haber tarfia repetida")
+
+				#if line.tipo_tarifa in existe_reacord_lines_tarifa and line.tipo_renta in existe_reacord_lines_renta:
+				#	raise ValidationError("No puede haber tarfia repetida")
+				existe_dict_lines_tarifas={
+				str(line.tipo_tarifa):line.tipo_renta,				
+				}
+				#existe_reacord_lines_tarifa.append(line.tipo_tarifa)
+				#existe_reacord_lines_renta.append(line.tipo_renta)
+
 	def _calculo_registro(self):
 		"""
 		suma la cantidad de eventos de calendario
@@ -59,6 +106,55 @@ class Account_asset_asset_customs(models.Model):
 			rec.count_reg=self.env['calendar.event'].search_count([('property_calendary','=',rec.id)])
 
 
+class Rental_rates(models.Model):
+
+	_name='rental.rates'
+
+	tipo_tarifa=fields.Selection(
+        string='Tarifa',
+        selection=[
+                 ('1', 'Tarifa Normal'),                 
+                 ('2', 'Tarifa Alta'),
+                 ('3', 'Tarifa baja'),                 
+        ],
+        )
+
+	costo_tarifa = fields.Float(
+   	    string='Costo',
+   	)	
+
+	tipo_renta=fields.Selection(
+        string='Tipo de renta',
+        selection=[
+                 ('1', 'Diario'),
+                 ('2', 'Semanal'),
+                 ('3', 'Mensual'),                 
+        ],
+        )
+
+	fecuencia_de_pagos = fields.Integer(
+	    string='Frecuencia',
+	)
+
+	deposito = fields.Float(
+	    string='Desposito',
+	)
+
+	company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        default=lambda self: self.env.user.company_id)
+
+	currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        related='company_id.currency_id',
+        string='Currency',
+        required=True)
+
+	propiedad_id = fields.Many2one(
+	    'account.asset.asset',
+	    string='Propiedad id',
+	)
 
 class Account_analytic_account_bh(models.Model):
 
@@ -82,10 +178,176 @@ class Account_analytic_account_bh(models.Model):
 
 	bandera_in_realizado = fields.Boolean(string='Realizado')
 
+	rate_busy=fields.Text(
+	    string='Rango ocupado',
+	)
+
+
+	def buscar_rango(self,days):
+		""""
+		Funcion para filtar la consulta dependiendo de los dias
+		como resultado arroja como la respuesta de la consulta
+		"""
+		if days>=1 and days<=7:
+			tarifa_dias=self.env['rental.rates'].search([('propiedad_id','=',self.property_id.id),
+				('tipo_tarifa','=',self.tipo_tarifa),('tipo_renta','=',1)])
+			return tarifa_dias #rango uno
+		if days>=8 and days<31:
+			tarifa_dias=self.env['rental.rates'].search([('propiedad_id','=',self.property_id.id),
+				('tipo_tarifa','=',self.tipo_tarifa),('tipo_renta','=',2)])
+			return tarifa_dias #rango dos
+		if days>31:
+			tarifa_dias=self.env['rental.rates'].search([('propiedad_id','=',self.property_id.id),
+				('tipo_tarifa','=',self.tipo_tarifa),('tipo_renta','=',3)])
+			return tarifa_dias #rango tres
+
+
+	def calcular_precios_renta(self):
+		if not self.property_owner_id:
+			ṕropiedad=self.env['account.asset.asset'].search([
+				('id','=',self.property_id.id)])
+			self.property_owner_id=ṕropiedad.property_owner.id
+			#raise UserError("El campo de dueño esta vacio")
+		if not self.chech_in:
+			raise UserError("Favor de marcar la hora de entrada")
+		if not self.chech_out:
+			raise UserError("Favor de marcar la hora de salida")
+
+		self.validate_ranges_date(self.chech_in,self.chech_out)
+
+		data={
+            'actividad':'new_tenancy',
+            'propiedad_id':self.property_id.id,
+            'contratos_id':self._origin.id,
+            'duenos_id':self.property_owner_id.id
+        }
+		self.env['alert.clock'].create(data)
+		partner_ids=self.env.user.partner_id.ids
+		if self.manager_id:
+			partner_ids.append(self.manager_id.partner_id.id)
+		if self.property_owner_id:
+			partner_ids.append(self.property_owner_id.parent_id.id)
+		if self.property_id.property_manager:
+			partner_ids.append(self.property_id.property_manager.id)
+
+		name_name=''
+		if self.property_id.name:
+			name_name+=self.property_id.name+":"
+		if self.code:
+			name_name+=self.code+"/"
+		if self.tenant_id.name:
+			name_name+=self.tenant_id.name
+
+		data_calendary={
+        'name':name_name,
+        'partner_ids':partner_ids,
+		'start':self.chech_in,
+        'stop':self.chech_out,
+        'allday':True,
+        'property_calendary':self.property_id.id,  
+        'property_tanency':self.id,
+        }
+		self.env['calendar.event'].create(data_calendary)
+
+		for tenancy_rec in self:
+			day_diff=(self.chech_out-self.chech_in).days
+			tarifa_select=self.buscar_rango(day_diff)
+			if len(tarifa_select)==0:
+				raise UserError("No se encontro una tarifa para usuar")
+			d1=self.chech_in
+			#DIARIO
+			if day_diff>=1 and day_diff<=7:
+				renta_total=tarifa_select.costo_tarifa*day_diff
+				pago_real=renta_total/tarifa_select.fecuencia_de_pagos
+				for iteracion in range(0,tarifa_select.fecuencia_de_pagos):
+					vard_data={
+						'start_date':d1,
+						'amount':pago_real,
+						'pen_amt':pago_real,
+						'property_id': tenancy_rec.property_id
+						and tenancy_rec.property_id.id or False,
+						'tenancy_id': tenancy_rec.id,
+						'currency_id': tenancy_rec.currency_id.id or False,
+						'rel_tenant_id': tenancy_rec.tenant_id.id,									
+					}
+					self.write({
+						'rent_schedule_ids':[(0,0,vard_data)]
+					})
+					d1=d1+relativedelta(days=1)
+				tenancy_rec.deposit=tarifa_select.deposito	
+				tenancy_rec.rent=pago_real		
+			#SEMANAL		
+			if day_diff>=8 and day_diff<31:
+				renta_total=tarifa_select.costo_tarifa*day_diff
+				pago_real=renta_total/tarifa_select.fecuencia_de_pagos
+				for iteracion in range(0,tarifa_select.fecuencia_de_pagos):
+					vard_data={
+						'start_date':d1,
+						'amount':pago_real,
+						'pen_amt':pago_real,
+						'property_id': tenancy_rec.property_id
+						and tenancy_rec.property_id.id or False,
+						'tenancy_id': tenancy_rec.id,
+						'currency_id': tenancy_rec.currency_id.id or False,
+						'rel_tenant_id': tenancy_rec.tenant_id.id,	
+						}
+					self.write({
+						'rent_schedule_ids':[(0,0,vard_data)]
+					})
+					d1=d1+relativedelta(weeks=1)
+				tenancy_rec.deposit=tarifa_select.deposito
+				tenancy_rec.rent=pago_real
+			#MENSUAL
+			if day_diff>=31:
+				intervalo=math.ceil(abs(day_diff/31))
+				renta_total=tarifa_select.costo_tarifa*day_diff
+				pago_real=renta_total/intervalo
+				for iteracion in range(0,intervalo):
+					vard_data={
+						'start_date':d1,
+						'amount':pago_real,
+						'pen_amt':pago_real,
+						'property_id': tenancy_rec.property_id
+						and tenancy_rec.property_id.id or False,
+						'tenancy_id': tenancy_rec.id,
+						'currency_id': tenancy_rec.currency_id.id or False,
+						'rel_tenant_id': tenancy_rec.tenant_id.id,	
+					}
+					self.write({
+						'rent_schedule_ids':[(0,0,vard_data)]
+					})
+					d1=d1+relativedelta(days=30)
+				tenancy_rec.deposit=tarifa_select.deposito	
+				tenancy_rec.rent=pago_real						
+			self.set_number_pay()
+			self.state='open'
+			return tenancy_rec.write({'rent_entry_chck': True})	
+
+	tipo_tarifa=fields.Selection(
+        string='Tarifa',
+        selection=[
+                 ('1', 'Tarifa Normal'),                 
+                 ('2', 'Tarifa Alta'),
+                 ('3', 'Tarifa baja'),                 
+        ]
+        )
+
+	def insert_accion(self,accion):
+		"""
+		crear los registro de alerta depediendode la actividad o accion
+		"""
+		self.env['alert.clock'].create({
+            'actividad':accion,
+            'propiedad_id':self.property_id.id,
+            'contratos_id':self._origin.id,
+            'duenos_id':self.property_owner_id.id,
+      })
+
 	@api.onchange('bandera_in_realizado')
 	def _onchange_bandera_in_realizado(self):
 		if self.bandera_in_realizado:
 			self.chech_in_realizado=datetime.now()
+			self.insert_accion('checking_in')
 		else:
 			self.chech_in_realizado=False
 
@@ -97,6 +359,7 @@ class Account_analytic_account_bh(models.Model):
 	def _onchange_bandera_out_realizado(self):
 		if self.bandera_out_realizado:
 			self.chech_out_realizado=datetime.now()
+			self.insert_accion('checking_out')
 		else:
 			self.chech_out_realizado=False
 
@@ -180,42 +443,25 @@ class Account_analytic_account_bh(models.Model):
 				payment.move_check=True
 	
 	def button_cancel_tenancy(self):
+		"""
+		Cuando se cancela un contrato se eliminar la alerta y al programacion del
+		calendario
+		"""
 		res=super(Account_analytic_account_bh,self).button_cancel_tenancy()
 		self.env['alert.clock'].search([('contratos_id','=',self.id)]).unlink()
 		self.env['calendar.event'].search([('property_tanency','=',self.id)]).unlink()
 		return res
 
-	def button_start(self):
-		res=super(Account_analytic_account_bh,self).button_start()
-		if not self.property_owner_id:
-			raise UserError("El campo de dueño esta vacio")
-		data={
-            'actividad':'new_tenancy',
-            'propiedad_id':self.property_id.id,
-            'contratos_id':self._origin.id,
-            'duenos_id':self.property_owner_id.id
-        }
-		self.env['alert.clock'].create(data)
-		partner_ids=self.env.user.partner_id.ids
-		if self.manager_id:
-			partner_ids.append(self.manager_id.partner_id.id)
-		if self.property_owner_id:
-			partner_ids.append(self.property_owner_id.parent_id.id)
-		
-		data_calendary={
-        'name':self.property_id.name+":"+self.code+"/"+self.tenant_id.name,
-        'partner_ids':partner_ids,
-		  'start_date':self.date_start,
-        'stop_date':self.date, 
-        'start':self.date_start,
-        'stop':self.date,
-        'allday':True,
-        'property_calendary':self.property_id.id,  
-        'property_tanency':self.id,
-        }
-		self.env['calendar.event'].create(data_calendary)
+	def button_close(self):
+		"""
+		Cuando se cancela un contrato se eliminar la alerta y al programacion del
+		calendario pero con solo cerrar el contrato
+		"""
+		res=super(Account_analytic_account_bh,self).button_close()
+		self.env['alert.clock'].search([('contratos_id','=',self.id)]).unlink()
+		self.env['calendar.event'].search([('property_tanency','=',self.id)]).unlink()
 		return res
-				
+			
 
 	def action_quotation_send(self):
 		"""
@@ -248,108 +494,69 @@ class Account_analytic_account_bh(models.Model):
 		self.env['mail.template'].browse(template_id).send_mail(self.id,force_send=True)
 
 
-	def create_rent_schedule(self):
+	def get_correct_date_show(self,fecha):
 		"""
-        This button method is used to create rent schedule Lines.
-        @param self: The object pointer
-        """
-		rent_obj = self.env['tenancy.rent.schedule']
-		for tenancy_rec in self:
-			if tenancy_rec.rent_type_id.renttype == 'Weekly':
-				d1 = tenancy_rec.date_start
-				d2 = tenancy_rec.date
-				interval = int(tenancy_rec.rent_type_id.name)
-				if d2 < d1:
-					raise Warning(
-                        _('End date must be greater than start date.'))
-				wek_diff = (d2 - d1)
-				wek_tot1 = (wek_diff.days) / (interval * 7)
-				wek_tot = (wek_diff.days) % (interval * 7)
-				if wek_diff.days == 0:
-					wek_tot = 1
-				if wek_tot1 > 0:
-					for wek_rec in range(int(wek_tot1)):
-						rent_obj.create(
-                            {'start_date': d1,
-                             'amount': tenancy_rec.rent * interval or 0.0,
-                             'property_id': tenancy_rec.property_id
-                                and tenancy_rec.property_id.id or False,
-                             'tenancy_id': tenancy_rec.id,
-                             'currency_id': tenancy_rec.currency_id.id
-                                or False,
-                             'rel_tenant_id': tenancy_rec.tenant_id.id
-                             })
-						d1 = d1 + relativedelta(days=(7 * interval))
-				if wek_tot > 0:
-					one_day_rent = 0.0
-					if tenancy_rec.rent:
-						one_day_rent = (tenancy_rec.rent) / (7 * interval)
-					rent_obj.create(
-                        {'start_date': d1.strftime(
-                            DEFAULT_SERVER_DATE_FORMAT),
-                         'amount': (one_day_rent * (wek_tot)) or 0.0,
-                         'property_id': tenancy_rec.property_id
-                            and tenancy_rec.property_id.id or False,
-                         'tenancy_id': tenancy_rec.id,
-                         'currency_id': tenancy_rec.currency_id.id or False,
-                         'rel_tenant_id': tenancy_rec.tenant_id.id
-                         })
-			elif tenancy_rec.rent_type_id.renttype != 'Weekly' and tenancy_rec.rent_type_id.renttype != 'Day':
-				if tenancy_rec.rent_type_id.renttype == 'Monthly':
-					interval = int(tenancy_rec.rent_type_id.name)
-				if tenancy_rec.rent_type_id.renttype == 'Yearly':
-					interval = int(tenancy_rec.rent_type_id.name) * 12
-				d1 = tenancy_rec.date_start
-				d2 = tenancy_rec.date
-				diff = abs((d1.year - d2.year) * 12 + (d1.month - d2.month))
-				tot_rec = diff / interval
-				tot_rec2 = diff % interval
-				if abs(d1.month - d2.month) >= 0 and d1.day < d2.day:
-					tot_rec2 += 1
-				if diff == 0:
-					tot_rec2 = 1
-				if tot_rec > 0:
-					for rec in range(int(tot_rec)):
-						rent_obj.create(
-                            {'start_date': d1,
-                             'amount': tenancy_rec.rent * interval or 0.0,
-                             'property_id': tenancy_rec.property_id
-                                and tenancy_rec.property_id.id or False,
-                             'tenancy_id': tenancy_rec.id,
-                             'currency_id': tenancy_rec.currency_id.id
-                                or False,
-                             'rel_tenant_id': tenancy_rec.tenant_id.id
-                             })
-						d1 = d1 + relativedelta(months=interval)
-				if tot_rec2 > 0:
-					rent_obj.create({
-                        'start_date': d1,
-                        'amount': tenancy_rec.rent * tot_rec2 or 0.0,
-                        'property_id': tenancy_rec.property_id
-                        and tenancy_rec.property_id.id or False,
-                        'tenancy_id': tenancy_rec.id,
-                        'currency_id': tenancy_rec.currency_id.id or False,
-                        'rel_tenant_id': tenancy_rec.tenant_id.id
-                    })
-			if tenancy_rec.rent_type_id.renttype == 'Day':
-				d1 = tenancy_rec.date_start
-				d2 = tenancy_rec.date
-				wek_diff = (d2 - d1)
-				dia_recod=0	
-				while dia_recod<wek_diff.days:
-					rent_obj.create({
-                        'start_date': d1,
-                        'amount': tenancy_rec.rent or 0.0,
-                        'property_id': tenancy_rec.property_id
-                        and tenancy_rec.property_id.id or False,
-                        'tenancy_id': tenancy_rec.id,
-                        'currency_id': tenancy_rec.currency_id.id or False,
-                        'rel_tenant_id': tenancy_rec.tenant_id.id
-                    })		
-					interval=int(self.rent_type_id.name)			
-					d1=d1+relativedelta(days=interval)
-					dia_recod+=interval			
+		Convertir la fecha que esta guarda en la base de datos a una que sea
+		totalmente funcional para el website
+		"""
+		user_tz = self.env.user.tz or pytz.utc
+		local = pytz.timezone(user_tz)
+		fecha_real=datetime.strftime(pytz.utc.localize
+			(datetime.strptime(fecha.strftime("%Y-%m-%d %H:%M:%S"), DEFAULT_SERVER_DATETIME_FORMAT)).
+			astimezone(local),"%d-%m-%Y %H:%M:%S")
+		return fecha_real
 
-			self.set_number_pay()		
-			return tenancy_rec.write({'rent_entry_chck': True})	
 
+
+	def validate_ranges_date(self,inicio,fin):
+		"""
+		con esta funcion se evita que selecionar reservas de propiedad
+		con fechas que ya estan ocupadas
+		"""
+		dates_calendar=self.env['calendar.event'].search([])
+
+
+		date_is_range_busy_start=False
+		date_is_range_busy_stop=False
+		for calen_dete in dates_calendar:
+			if (inicio>=calen_dete.start and inicio<=calen_dete.stop) and calen_dete.property_calendary.id==self.property_id.id:
+				date_is_range_busy_start=True				
+			if (fin>=calen_dete.start and fin<=calen_dete.stop) and calen_dete.property_calendary.id==self.property_id.id:
+				date_is_range_busy_stop=True
+
+		if date_is_range_busy_start or date_is_range_busy_stop:
+			raise UserError(_("El rengo de fecha de reserva ya esta ocupado, Favor de usar otra"))
+
+
+	@api.onchange('property_id')
+	def _onchange_property_id(self):
+		rangos=self.env['calendar.event'].search([('property_calendary','=',self.property_id.id)])
+		busy_days=''
+		for item in rangos:
+			busy_days+=self.get_correct_date_show(item.start)+" > "+self.get_correct_date_show(item.stop)+"\n"
+		self.rate_busy=busy_days
+
+	def get_correct_date_show(self,fecha):
+		"""
+		Convertir la fecha que esta guarda en la base de datos a una que sea
+		totalmente funcional 
+		"""
+		if fecha:			
+			user_tz = self.env.user.tz or pytz.utc
+			local = pytz.timezone(user_tz)
+			fecha_real=datetime.strftime(pytz.utc.localize
+				(datetime.strptime(fecha.strftime("%Y-%m-%d %H:%M:%S"), DEFAULT_SERVER_DATETIME_FORMAT)).
+				astimezone(local),"%d-%m-%Y %H:%M:%S")
+			return fecha_real
+
+	# @api.onchange('chech_in','chech_out')
+	# def _onchange_chechinout(self):
+	# 	for rec in self:
+	# 		rangos=self.env['calendar.event'].search(
+	# 			[('property_calendary','=',rec.property_id.id),
+	# 			('start_date','<=',self.get_correct_date_show(rec.chech_in)),
+	# 			('stop_date','>=',self.get_correct_date_show(rec.chech_out))])
+	# 		if len(rangos)>0:
+	# 			raise UserError("La el rengo seleccionado ya esta reservado")
+
+	    
